@@ -1,5 +1,5 @@
 {
-  "name": "Roguelike Game",
+  "name": "roguelike_game",
   "version": "0.1",
   "description": "Roguelike Game",
   "main": "dist/index.js",

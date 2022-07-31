@@ -1,0 +1,31 @@
+import Phaser from 'phaser'
+
+export default class Controller {
+  private scene: Phaser.Scene
+  private up: Phaser.Input.Keyboard.Key
+  private down: Phaser.Input.Keyboard.Key
+  private left: Phaser.Input.Keyboard.Key
+  private right: Phaser.Input.Keyboard.Key
+
+  constructor(scene: Phaser.Scene) {
+    this.scene = scene
+    this.initializeKeys()
+  }
+
+  private initializeKeys() {
+    this.up = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W)
+    this.down = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S)
+    this.left = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A)
+    this.right = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
+  }
+
+  public checkDirections() {
+    const dir = new Phaser.Math.Vector2()
+    if(this.up.isDown) dir.y--
+    if(this.down.isDown) dir.y++
+    if(this.left.isDown) dir.x--
+    if(this.right.isDown) dir.x++
+
+    return dir
+  }
+}

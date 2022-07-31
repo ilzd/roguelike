@@ -13,5 +13,13 @@ new Phaser.Game({
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH
   },
+  physics: {
+    default: 'arcade',
+    arcade: {
+        debug: true,
+        fixedStep: true,
+        fps: 60
+    }
+  },
   scene: [LoadScene, MenuScene, PlayScene]  
 });
