@@ -1,0 +1,4 @@
+export enum GameEvents {
+  UNIT_DIED = 'UNIT_DIED',
+  PROJECTILE_DIED = 'PROJECTILE_DIED'
+}

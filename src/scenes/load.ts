@@ -12,6 +12,7 @@ export default class LoadScene extends Phaser.Scene {
     this.load.image('player', 'assets/images/avatar.png')
     this.load.image('spider', 'assets/images/aranha.png')
     this.load.image('grass', 'assets/images/grass.png')
+    this.load.image('arrow', 'assets/images/arrow.png')
   }
 
   create() {
