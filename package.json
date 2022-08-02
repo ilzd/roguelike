@@ -1,16 +1,12 @@
 {
-<<<<<<< HEAD
-  "name": "roguelike_game",
-=======
   "name": "roguelikegame",
->>>>>>> 8522245bb0bdafbd140c9f3b1fbc2b4788a8fd8e
   "version": "0.1",
   "description": "Roguelike Game",
   "main": "dist/index.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "start": "yarn build && yarn dev"
+    "start": "yarn preview"
   },
   "repository": {
     "type": "git",
