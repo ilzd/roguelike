@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import { GameEvents } from '../enums/events.enum'
 import { IntensityEffect } from '../models/effects.model'
+import { UnitConfig } from '../models/unit.model'
 import PlayScene from '../scenes/play'
 import Attack from './attack'
 
@@ -31,10 +32,20 @@ export default abstract class Unit {
   private fast = 0
   private fastEffects: IntensityEffect[] = []
 
-  constructor (scene: PlayScene, x: number, y: number, key: string) {
+  constructor (scene: PlayScene, x: number, y: number, key: string, config: UnitConfig) {
     this.scene = scene
     this.id = scene.getUniqueId()
     this.createSprite(x, y, key)
+
+    this.initialize(config)
+  }
+
+  private initialize(config: UnitConfig) {
+    if(config.maxLife) {
+      this.maxLife = config.maxLife
+      this.life = this.maxLife
+    }
+    if(config.moveSpeed) this.moveSpeed = config.moveSpeed
   }
 
   private createSprite (x: number, y: number, key: string) {

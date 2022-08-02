@@ -34,6 +34,7 @@ export default class Controller {
   }
 
   getPointerWorldPosition () {
+    this.scene.input.activePointer.updateWorldPoint(this.scene.cameras.main);
     return new Phaser.Math.Vector2(this.scene.input.activePointer.worldX, this.scene.input.activePointer.worldY)
   }
 }
