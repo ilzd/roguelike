@@ -26,7 +26,8 @@ export default class Bow extends Attack {
       dirX: dir.x,
       dirY: dir.y,
       damage: 40,
-      pierce: 1
+      pierce: 1,
+      moveSpeed: 900
     }
     return new Projectile(this.scene, this.owner, config)
   }

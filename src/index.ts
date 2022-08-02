@@ -18,7 +18,7 @@ new Phaser.Game({
     arcade: {
         debug: true,
         fixedStep: true,
-        fps: 60
+        fps: 120
     }
   },
   scene: [LoadScene, MenuScene, PlayScene]  
