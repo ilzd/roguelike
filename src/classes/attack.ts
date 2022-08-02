@@ -33,6 +33,10 @@ export default abstract class Attack {
     return this.attacking
   }
 
+  isActivating() {
+    return this.activating
+  }
+
   private updateAttack(delta: number) {
     if(!this.attacking) return
 

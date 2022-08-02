@@ -51,7 +51,7 @@ export default class PlayScene extends Phaser.Scene {
 
   update (time: number, delta: number) {
     const deltaS = delta / 1000
-    
+
     this.checkPlayerInput()
 
     this.units.getChildren().forEach(sprite => {
@@ -64,7 +64,7 @@ export default class PlayScene extends Phaser.Scene {
     })
   }
 
-  private checkPlayerInput() {
+  private checkPlayerInput () {
     const inputDir = this.controller.checkDirections()
     const pointerPos = this.controller.getPointerWorldPosition()
     this.player.setMoveDir(inputDir.x, inputDir.y)
@@ -110,8 +110,8 @@ export default class PlayScene extends Phaser.Scene {
 
   private setupCollisions () {
     this.physics.add.collider(this.units, this.units)
-    this.physics.add.overlap(this.enemies, this.playerProjectiles, this.manageProjectileHit, () => {}, this)
-    this.physics.add.overlap(this.player.getSprite(), this.enemyProjectiles, this.manageProjectileHit, () => {}, this)
+    this.physics.add.overlap(this.enemies, this.playerProjectiles, this.manageProjectileHit, () => { }, this)
+    this.physics.add.overlap(this.player.getSprite(), this.enemyProjectiles, this.manageProjectileHit, () => { }, this)
   }
 
   private setupEvents () {
