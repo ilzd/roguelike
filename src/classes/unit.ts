@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import { GameEvents } from '../enums/events.enum'
-import { IntensityEffect } from '../models/effects'
+import { IntensityEffect } from '../models/effects.model'
 import PlayScene from '../scenes/play'
 import Attack from './attack'
 
@@ -26,6 +26,8 @@ export default abstract class Unit {
   private rootDuration = 0
   private slow = 0
   private slowEffects: IntensityEffect[] = []
+  
+  //positive effects
   private fast = 0
   private fastEffects: IntensityEffect[] = []
 
@@ -38,7 +40,6 @@ export default abstract class Unit {
   private createSprite (x: number, y: number, key: string) {
     this.sprite = this.scene.physics.add.sprite(x, y, key)
       .setCircle(20)
-      .setOrigin(0.5, 0.9)
     this.sprite.setData(Unit.DATA_KEY, this)
   }
 
@@ -129,7 +130,7 @@ export default abstract class Unit {
   }
 
   getPos () {
-    return new Phaser.Math.Vector2(this.sprite.body.x, this.sprite.body.y)
+    return new Phaser.Math.Vector2(this.sprite.x, this.sprite.y)
   }
 
   getLookDir () {

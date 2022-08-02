@@ -80,10 +80,11 @@ export default class PlayScene extends Phaser.Scene {
       height: 20
     })
 
+
     const tileset = this.tilemap.addTilesetImage('grass', 'grass', 64, 64)
 
     const layer1 = this.tilemap.createBlankLayer('layer1', tileset)
-    layer1.fill(0)
+    layer1.fill(0).setDepth(-Infinity)
   }
 
   private createPlayer () {

@@ -1,7 +1,7 @@
 import Unit from './unit'
 import Attack from './attack'
 import PlayScene from '../scenes/play'
-import { ProjectileConfig } from '../models/projectile'
+import { ProjectileConfig } from '../models/projectile.model'
 import Projectile from './projectile'
 
 export default class Bow extends Attack {
@@ -25,7 +25,8 @@ export default class Bow extends Attack {
       y: pos.y,
       dirX: dir.x,
       dirY: dir.y,
-      damage: 40
+      damage: 40,
+      pierce: 1
     }
     return new Projectile(this.scene, this.owner, config)
   }

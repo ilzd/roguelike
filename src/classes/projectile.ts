@@ -1,5 +1,5 @@
 import { GameEvents } from '../enums/events.enum'
-import { ProjectileConfig } from '../models/projectile'
+import { ProjectileConfig } from '../models/projectile.model'
 import PlayScene from '../scenes/play'
 import Unit from './unit'
 
@@ -8,12 +8,15 @@ export default class Projectile {
   private readonly scene: PlayScene
   private readonly owner: Unit
   protected sprite: Phaser.Physics.Arcade.Sprite
+  private unitsHit: Unit[] = []
   private moveDir = new Phaser.Math.Vector2()
   private moveSpeed = 600
   private rangeMax = 600
   private rangeCurr = 0
   private damage: number
   private radius = 4
+  private pierce = 0
+
 
   constructor (scene: PlayScene, owner: Unit, config: ProjectileConfig) {
     this.scene = scene
@@ -28,6 +31,7 @@ export default class Projectile {
     this.damage = config.damage
     if (config.range) this.rangeMax = config.range
     if (config.moveSpeed) this.moveSpeed = config.moveSpeed
+    if (config.pierce) this.pierce = config.pierce
   }
 
   private createSprite (x: number, y: number, key: string, originX: number, originY: number) {
@@ -70,7 +74,15 @@ export default class Projectile {
   }
 
   hit(unit: Unit) {
+    if(this.unitsHit.includes(unit)) return
+    this.unitsHit.push(unit)
     unit.takeDamage(this.damage, this.owner)
+
+    if(this.pierce > 0) {
+      this.pierce--
+      return
+    }
+
     this.die()
   }
 }

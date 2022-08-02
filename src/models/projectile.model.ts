@@ -10,4 +10,5 @@ export interface ProjectileConfig {
   range?: number,
   moveSpeed?: number
   radius?: number,
+  pierce?: number
 }
