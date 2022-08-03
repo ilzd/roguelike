@@ -13,6 +13,7 @@ export default abstract class Unit {
   public readonly id: number
   protected sprite: Phaser.Physics.Arcade.Sprite
   private moveDir = new Phaser.Math.Vector2(0, 0)
+  private lastMovingDir = new Phaser.Math.Vector2(0, 0)
   private lookDir = new Phaser.Math.Vector2(0, 0)
   protected attack: Attack
   protected skill: Skill
@@ -131,6 +132,7 @@ export default abstract class Unit {
 
   setMoveDir (x: number, y: number) {
     this.moveDir.set(x, y).normalize()
+    if(this.moveDir.x !== 0 || this.moveDir.y !== 0) this.lastMovingDir = this.moveDir.clone()
   }
 
   lookAt (x: number, y: number) {
@@ -166,6 +168,10 @@ export default abstract class Unit {
 
   getLookDir () {
     return this.lookDir.clone()
+  }
+
+  getMoveDir() {
+    return this.moveDir.clone()
   }
 
   applyStun (duration: number) {

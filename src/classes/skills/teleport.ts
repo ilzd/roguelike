@@ -16,7 +16,10 @@ export default class Teleport extends Skill {
 
   cast (): void {
     const destination = this.owner.getPos()
-    destination.add(this.owner.getLookDir().scale(this.DISTANCE))
+    let direction = this.owner.getMoveDir()
+    if(direction.x === 0 && direction.y === 0) direction = this.owner.getLookDir()
+
+    destination.add(direction.scale(this.DISTANCE))
     this.owner.teleport(destination.x, destination.y)
   }
 }

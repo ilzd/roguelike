@@ -20,6 +20,7 @@ export default class PlayScene extends Phaser.Scene {
   private projectiles: Phaser.Physics.Arcade.Group;
   private playerProjectiles: Phaser.Physics.Arcade.Group;
   private enemyProjectiles: Phaser.Physics.Arcade.Group;
+  private playerAimProjection = new Phaser.Math.Vector2()
   private player: Unit
   private controller: Controller
   private nextId = 0
@@ -51,16 +52,34 @@ export default class PlayScene extends Phaser.Scene {
 
   update (time: number, delta: number) {
     const deltaS = delta / 1000
-
     this.checkPlayerInput()
+    this.updateUnits(deltaS)
+    this.updateProjectiles(deltaS)
+    this.updatePlayerAimProjection()
+  }
 
+  private updatePlayerAimProjection() {
+    const playerSprite = this.player.getSprite()
+    const pointerPos = this.controller.getPointerWorldPosition()
+    const offset = new Phaser.Math.Vector2(pointerPos.x - playerSprite.x, pointerPos.y - playerSprite.y).scale(0.1)
+    this.playerAimProjection.set(playerSprite.x + offset.x, playerSprite.y + offset.y)
+  }
+
+  private updateUnits (delta: number) {
     this.units.getChildren().forEach(sprite => {
       const unit = sprite.getData(Unit.DATA_KEY) as Unit
-      unit.update(deltaS)
+      unit.update(delta)
     })
+  }
+
+  private updateProjectiles (delta: number) {
     this.playerProjectiles.getChildren().forEach(sprite => {
       const projectile = sprite.getData(Projectile.DATA_KEY) as Projectile
-      projectile.update(deltaS)
+      projectile.update(delta)
+    })
+    this.enemyProjectiles.getChildren().forEach(sprite => {
+      const projectile = sprite.getData(Projectile.DATA_KEY) as Projectile
+      projectile.update(delta)
     })
   }
 
@@ -102,7 +121,7 @@ export default class PlayScene extends Phaser.Scene {
   }
 
   private setupCamera () {
-    this.cameras.main.startFollow(this.player.getSprite())
+    this.cameras.main.startFollow(this.playerAimProjection, false, 0.06, 0.06)
   }
 
   private createController () {
