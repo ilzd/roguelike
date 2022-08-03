@@ -70,6 +70,7 @@ export default class PlayScene extends Phaser.Scene {
     this.player.setMoveDir(inputDir.x, inputDir.y)
     this.player.lookAt(pointerPos.x, pointerPos.y)
     if (this.controller.checkAttack()) this.player.beginAttack()
+    if (this.controller.checkCast()) this.player.beginCast()
   }
 
   private creatTilemap () {

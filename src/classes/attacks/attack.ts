@@ -1,5 +1,5 @@
-import PlayScene from '../scenes/play'
-import Unit from './unit'
+import PlayScene from '../../scenes/play'
+import Unit from '../unit'
 
 export default abstract class Attack {
   protected readonly scene: PlayScene
@@ -12,55 +12,66 @@ export default abstract class Attack {
   private activating = false
   private recovering = false
 
-  constructor(scene: PlayScene, owner: Unit) {
+  constructor (scene: PlayScene, owner: Unit) {
     this.scene = scene
     this.owner = owner
   }
 
-  update(delta: number) {
+  update (delta: number) {
     this.updateAttack(delta)
   }
 
-  beginAttack() {
-    if(this.attacking) return
-    
+  beginAttack () {
+    if (this.attacking) return
+
     this.attacking = true
     this.activating = true
     this.activationCurr = this.activationTime
   }
 
-  isAttacking() {
+  isAttacking () {
     return this.attacking
   }
 
-  isActivating() {
+  isActivating () {
     return this.activating
   }
 
-  private updateAttack(delta: number) {
-    if(!this.attacking) return
+  isRecovering () {
+    return this.recovering
+  }
 
-    if(this.activating) {
+  cancelAttack () {
+    if (this.isRecovering()) return
+
+    this.attacking = false
+    this.activating = false
+  }
+
+  private updateAttack (delta: number) {
+    if (!this.isAttacking()) return
+
+    if (this.isActivating()) {
       this.activationCurr -= delta
-      if(this.activationCurr <= 0) this.releaseAttack()
+      if (this.activationCurr <= 0) this.releaseAttack()
       return
     }
 
-    this.recoveryCurr -=  delta
-    if(this.recoveryCurr <= 0) this.finishAttack()
+    this.recoveryCurr -= delta
+    if (this.recoveryCurr <= 0) this.finishAttack()
   }
 
-  private releaseAttack(){
+  private releaseAttack () {
     this.activating = false
     this.recovering = true
     this.recoveryCurr = this.recoveryTime
     this.attack()
   }
 
-  private finishAttack() {
+  private finishAttack () {
     this.attacking = false
     this.recovering = false
   }
 
-  protected abstract attack(): void;
+  protected abstract attack (): void
 }

@@ -1,9 +1,10 @@
 import Phaser from 'phaser'
 import { GameEvents } from '../enums/events.enum'
-import { IntensityEffect } from '../models/effects.model'
+import { IntensityEffect } from '../models/effect.model'
 import { UnitConfig } from '../models/unit.model'
 import PlayScene from '../scenes/play'
-import Attack from './attack'
+import Attack from './attacks/attack'
+import Skill from './skills/skill'
 
 export default abstract class Unit {
   public static readonly DATA_KEY = 'unit'
@@ -14,6 +15,7 @@ export default abstract class Unit {
   private moveDir = new Phaser.Math.Vector2(0, 0)
   private lookDir = new Phaser.Math.Vector2(0, 0)
   protected attack: Attack
+  protected skill: Skill
 
   // stats
   private maxLife = 100
@@ -23,11 +25,13 @@ export default abstract class Unit {
   // negative effects
   private stunned = false
   private stunDuration = 0
+  private silenced = false
+  private silenceDuration = 0
   private rooted = false
   private rootDuration = 0
   private slow = 0
   private slowEffects: IntensityEffect[] = []
-  
+
   //positive effects
   private fast = 0
   private fastEffects: IntensityEffect[] = []
@@ -40,12 +44,12 @@ export default abstract class Unit {
     this.initialize(config)
   }
 
-  private initialize(config: UnitConfig) {
-    if(config.maxLife) {
+  private initialize (config: UnitConfig) {
+    if (config.maxLife) {
       this.maxLife = config.maxLife
       this.life = this.maxLife
     }
-    if(config.moveSpeed) this.moveSpeed = config.moveSpeed
+    if (config.moveSpeed) this.moveSpeed = config.moveSpeed
   }
 
   private createSprite (x: number, y: number, key: string) {
@@ -55,7 +59,7 @@ export default abstract class Unit {
   }
 
   private move () {
-    if (this.stunned || this.rooted) return
+    if (this.stunned || this.rooted || this.skill.isActivating()) return
 
     const modifier = (1 - this.slow + this.fast)
 
@@ -67,16 +71,18 @@ export default abstract class Unit {
   }
 
   private updateAttack (delta: number) {
-    if (this.stunned) return
-
     this.attack.update(delta)
+  }
+
+  private updateCast (delta: number) {
+    this.skill.update(delta)
   }
 
   private die () {
     this.scene.events.emit(GameEvents.UNIT_DIED, this)
   }
 
-  private stopMovement () {
+  stopMovement () {
     this.sprite.setVelocity(0, 0)
   }
 
@@ -84,6 +90,11 @@ export default abstract class Unit {
     if (this.stunned) {
       this.stunDuration -= delta
       if (this.stunDuration <= 0) this.stunned = false
+    }
+
+    if (this.silenced) {
+      this.silenceDuration -= delta
+      if (this.silenceDuration <= 0) this.silenced = false
     }
 
     if (this.rooted) {
@@ -113,6 +124,7 @@ export default abstract class Unit {
     this.updateBuffs(delta)
     this.move()
     this.updateAttack(delta)
+    this.updateCast(delta)
 
     this.sprite.setDepth(this.sprite.y)
   }
@@ -137,7 +149,15 @@ export default abstract class Unit {
   }
 
   beginAttack () {
-    this.attack.beginAttack()
+    if (this.stunned) return
+
+     this.attack.beginAttack()
+  }
+
+  beginCast () {
+    if (this.stunned || this.silenced) return
+    
+    this.skill.beginCast()
   }
 
   getPos () {
@@ -154,6 +174,16 @@ export default abstract class Unit {
     this.stunned = true
     this.stunDuration = Math.max(duration, this.stunDuration)
     this.stopMovement()
+    this.attack.cancelAttack()
+    this.skill.cancelCast()
+  }
+
+  applySilence (duration: number) {
+    if (duration <= 0) return
+
+    this.silenced = true
+    this.silenceDuration = Math.max(duration, this.silenceDuration)
+    this.skill.cancelCast()
   }
 
   applyRoot (duration: number) {
@@ -212,5 +242,9 @@ export default abstract class Unit {
 
   private applyFast (intensity: number) {
     if (intensity > this.fast) this.fast = intensity
-  }  
+  }
+
+  teleport (x: number, y: number) {
+    this.sprite.setPosition(x, y)
+  }
 }

@@ -6,6 +6,7 @@ export default class Controller {
   private down: Phaser.Input.Keyboard.Key
   private left: Phaser.Input.Keyboard.Key
   private right: Phaser.Input.Keyboard.Key
+  private cast: Phaser.Input.Keyboard.Key
 
   constructor (scene: Phaser.Scene) {
     this.scene = scene
@@ -17,6 +18,7 @@ export default class Controller {
     this.down = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S)
     this.left = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A)
     this.right = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
+    this.cast = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
   }
 
   checkDirections () {
@@ -31,6 +33,10 @@ export default class Controller {
 
   checkAttack () {
     return this.scene.input.activePointer.isDown
+  }
+
+  checkCast() {
+    return this.cast.isDown
   }
 
   getPointerWorldPosition () {

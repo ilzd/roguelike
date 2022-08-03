@@ -1,8 +1,8 @@
-import Unit from './unit'
+import Unit from '../unit'
 import Attack from './attack'
-import PlayScene from '../scenes/play'
-import { ProjectileConfig } from '../models/projectile.model'
-import Projectile from './projectile'
+import PlayScene from '../../scenes/play'
+import { ProjectileConfig } from '../../models/projectile.model'
+import Projectile from '../projectile'
 
 export default class Bow extends Attack {
   constructor (scene: PlayScene, owner: Unit) {

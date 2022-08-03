@@ -1,6 +1,7 @@
 import { UnitConfig } from '../models/unit.model'
 import PlayScene from '../scenes/play'
-import Bow from './bow'
+import Bow from './attacks/bow'
+import Teleport from './skills/teleport'
 import Unit from './unit'
 
 export default class Spider extends Unit {
@@ -12,5 +13,6 @@ export default class Spider extends Unit {
   constructor(scene: PlayScene, x: number, y: number){
     super(scene, x, y, 'spider', Spider.CONFIG)
     this.attack = new Bow(scene, this)
+    this.skill = new Teleport(scene, this)
   }
 }
