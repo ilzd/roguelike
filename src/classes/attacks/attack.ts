@@ -1,3 +1,4 @@
+import { AttackConfig } from '../../models/attack.model'
 import PlayScene from '../../scenes/play'
 import Unit from '../unit'
 
@@ -12,9 +13,16 @@ export default abstract class Attack {
   private activating = false
   private recovering = false
 
-  constructor (scene: PlayScene, owner: Unit) {
+  constructor (scene: PlayScene, owner: Unit, config: AttackConfig) {
     this.scene = scene
     this.owner = owner
+
+    this.initialize(config)
+  }
+
+  private initialize(config: AttackConfig) {
+    this.activationTime = config.activationTime
+    this.recoveryTime = config.recoveryTime
   }
 
   update (delta: number) {

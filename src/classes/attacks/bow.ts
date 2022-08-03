@@ -3,10 +3,16 @@ import Attack from './attack'
 import PlayScene from '../../scenes/play'
 import { ProjectileConfig } from '../../models/projectile.model'
 import Projectile from '../projectile'
+import { AttackConfig } from '../../models/attack.model'
 
 export default class Bow extends Attack {
+  static readonly CONFIG: AttackConfig = {
+    activationTime: 0.3,
+    recoveryTime: 0.6
+  }
+
   constructor (scene: PlayScene, owner: Unit) {
-    super(scene, owner)
+    super(scene, owner, Bow.CONFIG)
   }
 
   attack () {
