@@ -1,7 +1,7 @@
 import { GameEvents } from '../enums/events.enum'
 import { ProjectileConfig } from '../models/projectile.model'
 import PlayScene from '../scenes/play'
-import Unit from './unit'
+import Unit from './units/unit'
 
 export default class Projectile {
   public static readonly DATA_KEY = 'projectile'

@@ -1,4 +1,4 @@
-export interface AttackConfig {
+export interface WeaponConfig {
   activationTime: number
   recoveryTime: number
 }

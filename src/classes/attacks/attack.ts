@@ -1,8 +1,8 @@
-import { AttackConfig } from '../../models/attack.model'
+import { WeaponConfig } from '../../models/attack.model'
 import PlayScene from '../../scenes/play'
-import Unit from '../unit'
+import Unit from '../units/unit'
 
-export default abstract class Attack {
+export default abstract class Weapon {
   protected readonly scene: PlayScene
   protected readonly owner: Unit
   private activationTime = 0.5
@@ -13,14 +13,14 @@ export default abstract class Attack {
   private activating = false
   private recovering = false
 
-  constructor (scene: PlayScene, owner: Unit, config: AttackConfig) {
+  constructor (scene: PlayScene, owner: Unit, config: WeaponConfig) {
     this.scene = scene
     this.owner = owner
 
     this.initialize(config)
   }
 
-  private initialize(config: AttackConfig) {
+  private initialize(config: WeaponConfig) {
     this.activationTime = config.activationTime
     this.recoveryTime = config.recoveryTime
   }

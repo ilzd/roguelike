@@ -1,9 +1,9 @@
 import Phaser from 'phaser'
 import Controller from '../classes/controller'
-import Player from '../classes/player'
+import Player from '../classes/units/player'
 import Projectile from '../classes/projectile'
-import Spider from '../classes/spider'
-import Unit from '../classes/unit'
+import Spider from '../classes/units/spider'
+import Unit from '../classes/units/unit'
 import { GameEvents } from '../enums/events.enum'
 
 export default class PlayScene extends Phaser.Scene {
@@ -15,7 +15,8 @@ export default class PlayScene extends Phaser.Scene {
   public static readonly ENEMY_PROJECTILES_DATA_KEY = 'enemyprojectilesprites'
 
   private tilemap: Phaser.Tilemaps.Tilemap
-  private units: Phaser.Physics.Arcade.Group;
+  private units: Unit[] = []
+  private unitsGroup: Phaser.Physics.Arcade.Group;
   private enemies: Phaser.Physics.Arcade.Group;
   private projectiles: Phaser.Physics.Arcade.Group;
   private playerProjectiles: Phaser.Physics.Arcade.Group;
@@ -30,8 +31,8 @@ export default class PlayScene extends Phaser.Scene {
   }
 
   create () {
-    this.units = this.physics.add.group()
-    this.registry.set(PlayScene.UNITS_DATA_KEY, this.units)
+    this.unitsGroup = this.physics.add.group()
+    this.registry.set(PlayScene.UNITS_DATA_KEY, this.unitsGroup)
     this.enemies = this.physics.add.group()
     this.registry.set(PlayScene.ENEMIES_DATA_KEY, this.enemies)
     this.projectiles = this.physics.add.group()
@@ -58,7 +59,7 @@ export default class PlayScene extends Phaser.Scene {
     this.updatePlayerAimProjection()
   }
 
-  private updatePlayerAimProjection() {
+  private updatePlayerAimProjection () {
     const playerSprite = this.player.getSprite()
     const pointerPos = this.controller.getPointerWorldPosition()
     const offset = new Phaser.Math.Vector2(pointerPos.x - playerSprite.x, pointerPos.y - playerSprite.y).scale(0.1)
@@ -66,10 +67,11 @@ export default class PlayScene extends Phaser.Scene {
   }
 
   private updateUnits (delta: number) {
-    this.units.getChildren().forEach(sprite => {
-      const unit = sprite.getData(Unit.DATA_KEY) as Unit
-      unit.update(delta)
-    })
+    this.units.forEach(unit => { unit.update(delta) })
+    // this.unitsGroup.getChildren().forEach(sprite => {
+    //   const unit = sprite.getData(Unit.DATA_KEY) as Unit
+    //   unit.update(delta)
+    // })
   }
 
   private updateProjectiles (delta: number) {
@@ -108,15 +110,17 @@ export default class PlayScene extends Phaser.Scene {
 
   private createPlayer () {
     this.player = new Player(this, 0, 0)
-    this.units.add(this.player.getSprite())
+    this.unitsGroup.add(this.player.getSprite())
+    this.units.push(this.player)
   }
 
   private createEnemies () {
     for (let i = 0; i < 20; i++) {
       const newEnemy = new Spider(this, Phaser.Math.Between(0, 1366), Phaser.Math.Between(0, 768))
       const newEnemySprite = newEnemy.getSprite()
-      this.units.add(newEnemySprite)
+      this.unitsGroup.add(newEnemySprite)
       this.enemies.add(newEnemySprite)
+      this.units.push(newEnemy)
     }
   }
 
@@ -129,19 +133,29 @@ export default class PlayScene extends Phaser.Scene {
   }
 
   private setupCollisions () {
-    this.physics.add.collider(this.units, this.units)
+    this.physics.add.collider(this.unitsGroup, this.unitsGroup)
     this.physics.add.overlap(this.enemies, this.playerProjectiles, this.manageProjectileHit, () => { }, this)
     this.physics.add.overlap(this.player.getSprite(), this.enemyProjectiles, this.manageProjectileHit, () => { }, this)
   }
 
   private setupEvents () {
     this.events.on(GameEvents.UNIT_DIED, (unit: Unit) => {
-      this.units.remove(unit.getSprite(), true, true)
+      this.removeUnit(unit)
     })
 
     this.events.on(GameEvents.PROJECTILE_DIED, (projectile: Projectile) => {
       const projectileSprite = projectile.getSprite()
       this.projectiles.remove(projectileSprite, true, true)
+    })
+
+    this.events.on(GameEvents.START_PHASING, (unit: Unit) => {
+      const unitSprite = unit.getSprite()
+      this.unitsGroup.remove(unitSprite)
+    })
+
+    this.events.on(GameEvents.STOP_PHASING, (unit: Unit) => {
+      const unitSprite = unit.getSprite()
+      this.unitsGroup.add(unitSprite)
     })
   }
 
@@ -163,5 +177,10 @@ export default class PlayScene extends Phaser.Scene {
 
   getUniqueId () {
     return this.nextId++
+  }
+
+  removeUnit(unit: Unit) {
+    this.units.splice(this.units.indexOf(unit), 1)
+    this.unitsGroup.remove(unit.getSprite(), true, true)
   }
 }

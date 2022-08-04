@@ -1,12 +1,12 @@
-import Unit from '../unit'
-import Attack from './attack'
+import Unit from '../units/unit'
+import Weapon from './attack'
 import PlayScene from '../../scenes/play'
 import { ProjectileConfig } from '../../models/projectile.model'
 import Projectile from '../projectile'
-import { AttackConfig } from '../../models/attack.model'
+import { WeaponConfig } from '../../models/attack.model'
 
-export default class Bow extends Attack {
-  static readonly CONFIG: AttackConfig = {
+export default class Bow extends Weapon {
+  static readonly CONFIG: WeaponConfig = {
     activationTime: 0.3,
     recoveryTime: 0.6
   }
@@ -18,6 +18,7 @@ export default class Bow extends Attack {
   attack () {
     const newArrow = this.buildArrow()
     this.scene.addProjectile(newArrow)
+    this.owner.applyPhasing(5)
   }
 
   buildArrow () {

@@ -1,10 +1,10 @@
 import Phaser from 'phaser'
-import { GameEvents } from '../enums/events.enum'
-import { IntensityEffect } from '../models/effect.model'
-import { UnitConfig } from '../models/unit.model'
-import PlayScene from '../scenes/play'
-import Attack from './attacks/attack'
-import Skill from './skills/skill'
+import { GameEvents } from '../../enums/events.enum'
+import { IntensityEffect } from '../../models/effect.model'
+import { UnitConfig } from '../../models/unit.model'
+import PlayScene from '../../scenes/play'
+import Weapon from '../attacks/attack'
+import Skill from '../skills/skill'
 
 export default abstract class Unit {
   public static readonly DATA_KEY = 'unit'
@@ -13,15 +13,15 @@ export default abstract class Unit {
   public readonly id: number
   protected sprite: Phaser.Physics.Arcade.Sprite
   private moveDir = new Phaser.Math.Vector2(0, 0)
-  private lastMovingDir = new Phaser.Math.Vector2(0, 0)
   private lookDir = new Phaser.Math.Vector2(0, 0)
-  protected attack: Attack
+  protected weapon: Weapon
   protected skill: Skill
 
   // stats
   private maxLife = 100
   private life = this.maxLife
   private moveSpeed = 128;
+  private radius = 20
 
   // negative effects
   private stunned = false
@@ -36,13 +36,14 @@ export default abstract class Unit {
   //positive effects
   private fast = 0
   private fastEffects: IntensityEffect[] = []
+  private phasing = false
+  private phasingDuration  = 0
 
   constructor (scene: PlayScene, x: number, y: number, key: string, config: UnitConfig) {
     this.scene = scene
     this.id = scene.getUniqueId()
-    this.createSprite(x, y, key)
-
     this.initialize(config)
+    this.createSprite(x, y, key)
   }
 
   private initialize (config: UnitConfig) {
@@ -51,11 +52,12 @@ export default abstract class Unit {
       this.life = this.maxLife
     }
     if (config.moveSpeed) this.moveSpeed = config.moveSpeed
+    if (config.radius) this.radius = config.radius
   }
 
   private createSprite (x: number, y: number, key: string) {
     this.sprite = this.scene.physics.add.sprite(x, y, key)
-      .setCircle(20)
+      .setCircle(this.radius)
     this.sprite.setData(Unit.DATA_KEY, this)
   }
 
@@ -65,14 +67,14 @@ export default abstract class Unit {
     const modifier = (1 - this.slow + this.fast)
 
     let speed = this.moveSpeed
-    if (this.attack.isActivating()) speed *= .5
+    if (this.weapon.isActivating()) speed *= .5
     speed *= modifier
 
     this.sprite.setVelocity(this.moveDir.x * speed, this.moveDir.y * speed)
   }
 
-  private updateAttack (delta: number) {
-    this.attack.update(delta)
+  private updateWeapon (delta: number) {
+    this.weapon.update(delta)
   }
 
   private updateCast (delta: number) {
@@ -114,6 +116,14 @@ export default abstract class Unit {
       fastEffect.duration -= delta
       if (fastEffect.duration <= 0) this.removeFast(index)
     })
+
+    if (this.phasing) {
+      this.phasingDuration -= delta
+      if (this.phasingDuration <= 0) {
+        this.phasing = false
+        this.scene.events.emit(GameEvents.STOP_PHASING, this)
+      }
+    }
   }
 
   getSprite () {
@@ -124,7 +134,7 @@ export default abstract class Unit {
     this.updateDebuffs(delta)
     this.updateBuffs(delta)
     this.move()
-    this.updateAttack(delta)
+    this.updateWeapon(delta)
     this.updateCast(delta)
 
     this.sprite.setDepth(this.sprite.y)
@@ -132,7 +142,6 @@ export default abstract class Unit {
 
   setMoveDir (x: number, y: number) {
     this.moveDir.set(x, y).normalize()
-    if(this.moveDir.x !== 0 || this.moveDir.y !== 0) this.lastMovingDir = this.moveDir.clone()
   }
 
   lookAt (x: number, y: number) {
@@ -153,7 +162,7 @@ export default abstract class Unit {
   beginAttack () {
     if (this.stunned) return
 
-     this.attack.beginAttack()
+     this.weapon.beginAttack()
   }
 
   beginCast () {
@@ -180,7 +189,7 @@ export default abstract class Unit {
     this.stunned = true
     this.stunDuration = Math.max(duration, this.stunDuration)
     this.stopMovement()
-    this.attack.cancelAttack()
+    this.weapon.cancelAttack()
     this.skill.cancelCast()
   }
 
@@ -248,6 +257,14 @@ export default abstract class Unit {
 
   private applyFast (intensity: number) {
     if (intensity > this.fast) this.fast = intensity
+  }
+
+  applyPhasing(duration: number) {
+    if (duration <= 0) return
+
+    this.phasing = true
+    this.phasingDuration = Math.max(duration, this.phasingDuration)
+    this.scene.events.emit(GameEvents.START_PHASING, this)    
   }
 
   teleport (x: number, y: number) {

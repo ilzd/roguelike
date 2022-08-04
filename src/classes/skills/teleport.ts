@@ -1,6 +1,6 @@
 import { SkillConfig } from '../../models/skill.model'
 import PlayScene from '../../scenes/play'
-import Unit from '../unit'
+import Unit from '../units/unit'
 import Skill from './skill'
 
 export default class Teleport extends Skill {
