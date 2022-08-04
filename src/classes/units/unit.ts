@@ -32,6 +32,8 @@ export default abstract class Unit {
   private rootDuration = 0
   private slow = 0
   private slowEffects: IntensityEffect[] = []
+  private sliding = false
+  private slideDuration = 0
 
   //positive effects
   private fast = 0
@@ -95,6 +97,11 @@ export default abstract class Unit {
       if (this.stunDuration <= 0) this.stunned = false
     }
 
+    if (this.sliding) {
+      this.slideDuration -= delta
+      if (this.slideDuration <= 0) this.sliding = false
+    }
+
     if (this.silenced) {
       this.silenceDuration -= delta
       if (this.silenceDuration <= 0) this.silenced = false
@@ -141,6 +148,7 @@ export default abstract class Unit {
   }
 
   setMoveDir (x: number, y: number) {
+    if(this.sliding) return
     this.moveDir.set(x, y).normalize()
   }
 
@@ -193,6 +201,13 @@ export default abstract class Unit {
     this.skill.cancelCast()
   }
 
+  applySlide (duration: number) {
+    if (duration <= 0) return
+
+    this.sliding = true
+    this.slideDuration = Math.max(duration, this.slideDuration)
+  }
+
   applySilence (duration: number) {
     if (duration <= 0) return
 
@@ -210,10 +225,8 @@ export default abstract class Unit {
   }
 
   addSlow (newSlow: IntensityEffect) {
-    console.log(`received slow ${newSlow.intensity} - ${newSlow.duration}`)
     const betterSlow = this.slowEffects.find(slowEffect => slowEffect.duration >= newSlow.duration && slowEffect.intensity >= newSlow.intensity)
     if (betterSlow) return
-    console.log(`added slow ${newSlow.intensity} - ${newSlow.duration}`)
     this.slowEffects.push(newSlow)
     this.slowEffects.sort((a, b) => b.intensity - a.intensity)
 
@@ -235,10 +248,8 @@ export default abstract class Unit {
   }
 
   addFast (newFast: IntensityEffect) {
-    console.log(`received fast ${newFast.intensity} - ${newFast.duration}`)
     const betterFast = this.fastEffects.find(fastEffect => fastEffect.duration >= newFast.duration && fastEffect.intensity >= newFast.intensity)
     if (betterFast) return
-    console.log(`added fast ${newFast.intensity} - ${newFast.duration}`)
     this.fastEffects.push(newFast)
     this.fastEffects.sort((a, b) => b.intensity - a.intensity)
 

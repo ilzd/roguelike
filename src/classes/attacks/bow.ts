@@ -18,7 +18,6 @@ export default class Bow extends Weapon {
   attack () {
     const newArrow = this.buildArrow()
     this.scene.addProjectile(newArrow)
-    this.owner.applyPhasing(5)
   }
 
   buildArrow () {
