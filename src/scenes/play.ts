@@ -1,10 +1,12 @@
 import Phaser from 'phaser'
-import Controller from '../classes/controller'
-import Player from '../classes/units/player'
+import Human from '../classes/units/human'
 import Projectile from '../classes/projectile'
 import Spider from '../classes/units/spider'
 import Unit from '../classes/units/unit'
 import { GameEvents } from '../enums/events.enum'
+import ManualController from '../classes/controller/manual-controller'
+import EnemyController from '../classes/controller/enemy-controller'
+import { Vector } from 'matter'
 
 export default class PlayScene extends Phaser.Scene {
   public static readonly SCENE_KEY = 'playscene'
@@ -23,7 +25,6 @@ export default class PlayScene extends Phaser.Scene {
   private enemyProjectiles: Phaser.Physics.Arcade.Group;
   private playerAimProjection = new Phaser.Math.Vector2()
   private player: Unit
-  private controller: Controller
   private nextId = 0
 
   constructor () {
@@ -32,6 +33,7 @@ export default class PlayScene extends Phaser.Scene {
 
   create () {
     this.unitsGroup = this.physics.add.group()
+    this.unitsGroup.defaults.setCollideWorldBounds = true
     this.registry.set(PlayScene.UNITS_DATA_KEY, this.unitsGroup)
     this.enemies = this.physics.add.group()
     this.registry.set(PlayScene.ENEMIES_DATA_KEY, this.enemies)
@@ -45,7 +47,6 @@ export default class PlayScene extends Phaser.Scene {
     this.createTilemap()
     this.createPlayer()
     this.createEnemies()
-    this.createController()
     this.setupCamera()
     this.setupCollisions()
     this.setupEvents()
@@ -53,7 +54,6 @@ export default class PlayScene extends Phaser.Scene {
 
   update (time: number, delta: number) {
     const deltaS = delta / 1000
-    this.checkPlayerInput()
     this.updateUnits(deltaS)
     this.updateProjectiles(deltaS)
     this.updatePlayerAimProjection()
@@ -61,17 +61,13 @@ export default class PlayScene extends Phaser.Scene {
 
   private updatePlayerAimProjection () {
     const playerSprite = this.player.getSprite()
-    const pointerPos = this.controller.getPointerWorldPosition()
+    const pointerPos = this.getPointerWorldPosition()
     const offset = new Phaser.Math.Vector2(pointerPos.x - playerSprite.x, pointerPos.y - playerSprite.y).scale(0.1)
     this.playerAimProjection.set(playerSprite.x + offset.x, playerSprite.y + offset.y)
   }
 
   private updateUnits (delta: number) {
     this.units.forEach(unit => { unit.update(delta) })
-    // this.unitsGroup.getChildren().forEach(sprite => {
-    //   const unit = sprite.getData(Unit.DATA_KEY) as Unit
-    //   unit.update(delta)
-    // })
   }
 
   private updateProjectiles (delta: number) {
@@ -85,30 +81,29 @@ export default class PlayScene extends Phaser.Scene {
     })
   }
 
-  private checkPlayerInput () {
-    const inputDir = this.controller.checkDirections()
-    const pointerPos = this.controller.getPointerWorldPosition()
-    this.player.setMoveDir(inputDir.x, inputDir.y)
-    this.player.lookAt(pointerPos.x, pointerPos.y)
-    if (this.controller.checkAttack()) this.player.beginAttack()
-    if (this.controller.checkCast()) this.player.beginCast()
-  }
-
   private createTilemap () {
     this.tilemap = this.add.tilemap('map1')
     this.tilemap.addTilesetImage('tileset', 'tileset')
     this.tilemap.createLayer('layer1', 'tileset').setDepth(-Infinity)
+
+    this.physics.world.setBounds(0, 0, this.tilemap.widthInPixels, this.tilemap.heightInPixels)
   }
 
   private createPlayer () {
-    this.player = new Player(this, 0, 0)
-    this.unitsGroup.add(this.player.getSprite())
+    const playerSpawn = new Phaser.Math.Vector2(Phaser.Math.Between(0, this.tilemap.widthInPixels), Phaser.Math.Between(0, this.tilemap.heightInPixels))
+    this.player = new Human(this, playerSpawn.x, playerSpawn.y)
+    this.player.setController(new ManualController(this, this.player))
+    const playerSprite = this.player.getSprite()
+    this.unitsGroup.add(playerSprite)
     this.units.push(this.player)
+
+    this.playerAimProjection.set(playerSpawn.x, playerSpawn.y)
   }
 
   private createEnemies () {
     for (let i = 0; i < 50; i++) {
       const newEnemy = new Spider(this, Phaser.Math.Between(0, this.tilemap.widthInPixels), Phaser.Math.Between(0, this.tilemap.heightInPixels))
+      newEnemy.setController(new EnemyController(this, newEnemy))
       const newEnemySprite = newEnemy.getSprite()
       this.unitsGroup.add(newEnemySprite)
       this.enemies.add(newEnemySprite)
@@ -118,10 +113,6 @@ export default class PlayScene extends Phaser.Scene {
 
   private setupCamera () {
     this.cameras.main.startFollow(this.playerAimProjection, true, 0.06, 0.06)
-  }
-
-  private createController () {
-    this.controller = new Controller(this)
   }
 
   private setupCollisions () {
@@ -171,8 +162,13 @@ export default class PlayScene extends Phaser.Scene {
     return this.nextId++
   }
 
-  removeUnit(unit: Unit) {
+  removeUnit (unit: Unit) {
     this.units.splice(this.units.indexOf(unit), 1)
     this.unitsGroup.remove(unit.getSprite(), true, true)
+  }
+
+  getPointerWorldPosition () {
+    this.input.activePointer.updateWorldPoint(this.cameras.main);
+    return new Phaser.Math.Vector2(this.input.activePointer.worldX, this.input.activePointer.worldY)
   }
 }

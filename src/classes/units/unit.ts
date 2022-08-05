@@ -4,6 +4,7 @@ import { IntensityEffect } from '../../models/effect.model'
 import { UnitConfig } from '../../models/unit.model'
 import PlayScene from '../../scenes/play'
 import Weapon from '../attacks/attack'
+import Controller from '../controller/controller'
 import Skill from '../skills/skill'
 
 export default abstract class Unit {
@@ -11,6 +12,8 @@ export default abstract class Unit {
 
   private scene: Phaser.Scene
   public readonly id: number
+  private controller: Controller
+  public key: string
   protected sprite: Phaser.Physics.Arcade.Sprite
   private moveDir = new Phaser.Math.Vector2(0, 0)
   private lookDir = new Phaser.Math.Vector2(0, 0)
@@ -50,6 +53,7 @@ export default abstract class Unit {
   private initialize (x: number, y: number, config: UnitConfig) {
     if (config.radius) this.radius = config.radius
 
+    this.key = config.key
     this.createSprite(x, y, config.key, config.origX, config.origY, config.scale)
 
     if (config.maxLife) {
@@ -61,6 +65,10 @@ export default abstract class Unit {
     this.setMoveDir(0, 0)
   }
 
+  setController(controller: Controller) {
+    this.controller = controller
+  }
+
   private createSprite (x: number, y: number, key: string, origX: number, origY: number, scale: number = 1) {
     this.sprite = this.scene.physics.add.sprite(x, y, key)
       .setScale(scale)
@@ -68,38 +76,29 @@ export default abstract class Unit {
       .setOrigin(origX, origY)
       .setData(Unit.DATA_KEY, this)
       
-    this.sprite.body.setOffset(this.sprite.width * origX - this.radius, this.sprite.height * origY - this.radius)
-      
+    this.sprite.setOffset(this.sprite.width * origX - this.radius, this.sprite.height * origY - this.radius)
 
     this.createAnimations(key)
-    this.sprite.play('walk_down')
+    this.playSpriteAnimation('walk_down')
   }
 
   private createAnimations (key: string) {
-    this.sprite.anims.create({
-      key: `walk_down`,
-      frames: this.sprite.anims.generateFrameNumbers(key, { frames: [0, 1, 2, 3] }),
-      repeat: -1,
-      frameRate: 6
+    const animsJSON = this.scene.cache.json.get('animations')
+    animsJSON.animations.forEach((anim: {name: string, frames: number[]}) => {
+      const animKey = `${key}_${anim.name}`
+      if(!this.scene.anims.exists(animKey)){
+        this.scene.anims.create({
+          key: animKey,
+          frames: this.scene.anims.generateFrameNumbers(key, { frames: anim.frames }),
+          repeat: -1,
+          frameRate: 6
+        })
+      }
     })
-    this.sprite.anims.create({
-      key: `walk_left`,
-      frames: this.sprite.anims.generateFrameNumbers(key, { frames: [4, 5, 6, 7] }),
-      repeat: -1,
-      frameRate: 6
-    })
-    this.sprite.anims.create({
-      key: `walk_right`,
-      frames: this.sprite.anims.generateFrameNumbers(key, { frames: [8, 9, 10, 11] }),
-      repeat: -1,
-      frameRate: 6
-    })
-    this.sprite.anims.create({
-      key: `walk_up`,
-      frames: this.sprite.anims.generateFrameNumbers(key, { frames: [12, 13, 14, 15] }),
-      repeat: -1,
-      frameRate: 6
-    })
+  }
+
+  private playSpriteAnimation(animName: string) {
+    this.sprite.play(`${this.key}_${animName}`, true)
   }
 
   private move () {
@@ -122,28 +121,27 @@ export default abstract class Unit {
     this.skill.update(delta)
   }
 
-  private playAnimation () {
+  private playMovementAnimation () {
     if (this.moveDir.x === 0 && this.moveDir.y === 0) {
       this.sprite.anims.pause(this.sprite.anims.currentAnim.frames[0])
       return
     }
 
     if (this.moveDir.x < 0) {
-      this.sprite.play('walk_left', true)
+      this.playSpriteAnimation('walk_left')
       return
     }
 
     if (this.moveDir.x > 0) {
-      this.sprite.play('walk_right', true)
+      this.playSpriteAnimation('walk_right')
       return
     }
 
     if (this.moveDir.y < 0) {
-      this.sprite.play('walk_up', true)
+      this.playSpriteAnimation('walk_up')
       return
     }
-
-    this.sprite.play('walk_down', true)
+    this.playSpriteAnimation('walk_down')
   }
 
   private die () {
@@ -201,6 +199,7 @@ export default abstract class Unit {
   }
 
   update (delta: number) {
+    this.controller?.update()
     this.updateDebuffs(delta)
     this.updateBuffs(delta)
     this.move()
@@ -213,7 +212,7 @@ export default abstract class Unit {
   setMoveDir (x: number, y: number) {
     if (this.sliding) return
     this.moveDir.set(x, y).normalize()
-    this.playAnimation()
+    this.playMovementAnimation()
   }
 
   lookAt (x: number, y: number) {

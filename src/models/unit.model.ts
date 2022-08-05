@@ -1,3 +1,5 @@
+import Controller from '../classes/controller/controller'
+
 export interface UnitConfig {
   key: string,
   origX: number,

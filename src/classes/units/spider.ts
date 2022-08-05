@@ -1,6 +1,7 @@
 import { UnitConfig } from '../../models/unit.model'
 import PlayScene from '../../scenes/play'
 import Bow from '../attacks/bow'
+import Controller from '../controller/controller'
 import Teleport from '../skills/teleport'
 import Unit from './unit'
 

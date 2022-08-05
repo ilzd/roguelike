@@ -21,5 +21,6 @@ export default class Dash extends Skill {
     this.owner.setMoveDir(direction.x, direction.y)
     this.owner.addFast({intensity: this.FAST_INTENSITY, duration: this.DURATION})
     this.owner.applySlide(this.DURATION)
+    this.owner.applyPhasing(this.DURATION)
   }
 }

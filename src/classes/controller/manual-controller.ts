@@ -1,15 +1,17 @@
 import Phaser from 'phaser'
+import PlayScene from '../../scenes/play'
+import Unit from '../units/unit'
+import Controller from './controller'
 
-export default class Controller {
-  private scene: Phaser.Scene
+export default class ManualController extends Controller {
   private up: Phaser.Input.Keyboard.Key
   private down: Phaser.Input.Keyboard.Key
   private left: Phaser.Input.Keyboard.Key
   private right: Phaser.Input.Keyboard.Key
   private cast: Phaser.Input.Keyboard.Key
 
-  constructor (scene: Phaser.Scene) {
-    this.scene = scene
+  constructor (scene: PlayScene, target: Unit) {
+    super(scene, target)
     this.initializeKeys()
   }
 
@@ -21,7 +23,7 @@ export default class Controller {
     this.cast = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
   }
 
-  checkDirections () {
+  private checkDirections () {
     const dir = new Phaser.Math.Vector2()
     if (this.up.isDown) dir.y--
     if (this.down.isDown) dir.y++
@@ -31,16 +33,20 @@ export default class Controller {
     return dir
   }
 
-  checkAttack () {
+  private checkAttack () {
     return this.scene.input.activePointer.isDown
   }
 
-  checkCast() {
+  private checkCast() {
     return this.cast.isDown
   }
 
-  getPointerWorldPosition () {
-    this.scene.input.activePointer.updateWorldPoint(this.scene.cameras.main);
-    return new Phaser.Math.Vector2(this.scene.input.activePointer.worldX, this.scene.input.activePointer.worldY)
+  update() {
+    const inputDir = this.checkDirections()
+    const pointerPos = this.scene.getPointerWorldPosition()
+    this.target.setMoveDir(inputDir.x, inputDir.y)
+    this.target.lookAt(pointerPos.x, pointerPos.y)
+    if (this.checkAttack()) this.target.beginAttack()
+    if (this.checkCast()) this.target.beginCast()
   }
 }
