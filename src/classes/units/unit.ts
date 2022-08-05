@@ -20,7 +20,7 @@ export default abstract class Unit {
   // stats
   private maxLife = 100
   private life = this.maxLife
-  private moveSpeed = 128;
+  private moveSpeed = 200;
   private radius = 20
 
   // negative effects
@@ -39,28 +39,67 @@ export default abstract class Unit {
   private fast = 0
   private fastEffects: IntensityEffect[] = []
   private phasing = false
-  private phasingDuration  = 0
+  private phasingDuration = 0
 
-  constructor (scene: PlayScene, x: number, y: number, key: string, config: UnitConfig) {
+  constructor (scene: PlayScene, x: number, y: number, config: UnitConfig) {
     this.scene = scene
     this.id = scene.getUniqueId()
-    this.initialize(config)
-    this.createSprite(x, y, key)
+    this.initialize(x, y, config)
   }
 
-  private initialize (config: UnitConfig) {
+  private initialize (x: number, y: number, config: UnitConfig) {
+    if (config.radius) this.radius = config.radius
+
+    this.createSprite(x, y, config.key, config.origX, config.origY, config.scale)
+
     if (config.maxLife) {
       this.maxLife = config.maxLife
       this.life = this.maxLife
     }
     if (config.moveSpeed) this.moveSpeed = config.moveSpeed
-    if (config.radius) this.radius = config.radius
+
+    this.setMoveDir(0, 0)
   }
 
-  private createSprite (x: number, y: number, key: string) {
+  private createSprite (x: number, y: number, key: string, origX: number, origY: number, scale: number = 1) {
     this.sprite = this.scene.physics.add.sprite(x, y, key)
+      .setScale(scale)
       .setCircle(this.radius)
-    this.sprite.setData(Unit.DATA_KEY, this)
+      .setOrigin(origX, origY)
+      .setData(Unit.DATA_KEY, this)
+      
+    this.sprite.body.setOffset(this.sprite.width * origX - this.radius, this.sprite.height * origY - this.radius)
+      
+
+    this.createAnimations(key)
+    this.sprite.play('walk_down')
+  }
+
+  private createAnimations (key: string) {
+    this.sprite.anims.create({
+      key: `walk_down`,
+      frames: this.sprite.anims.generateFrameNumbers(key, { frames: [0, 1, 2, 3] }),
+      repeat: -1,
+      frameRate: 6
+    })
+    this.sprite.anims.create({
+      key: `walk_left`,
+      frames: this.sprite.anims.generateFrameNumbers(key, { frames: [4, 5, 6, 7] }),
+      repeat: -1,
+      frameRate: 6
+    })
+    this.sprite.anims.create({
+      key: `walk_right`,
+      frames: this.sprite.anims.generateFrameNumbers(key, { frames: [8, 9, 10, 11] }),
+      repeat: -1,
+      frameRate: 6
+    })
+    this.sprite.anims.create({
+      key: `walk_up`,
+      frames: this.sprite.anims.generateFrameNumbers(key, { frames: [12, 13, 14, 15] }),
+      repeat: -1,
+      frameRate: 6
+    })
   }
 
   private move () {
@@ -81,6 +120,30 @@ export default abstract class Unit {
 
   private updateCast (delta: number) {
     this.skill.update(delta)
+  }
+
+  private playAnimation () {
+    if (this.moveDir.x === 0 && this.moveDir.y === 0) {
+      this.sprite.anims.pause(this.sprite.anims.currentAnim.frames[0])
+      return
+    }
+
+    if (this.moveDir.x < 0) {
+      this.sprite.play('walk_left', true)
+      return
+    }
+
+    if (this.moveDir.x > 0) {
+      this.sprite.play('walk_right', true)
+      return
+    }
+
+    if (this.moveDir.y < 0) {
+      this.sprite.play('walk_up', true)
+      return
+    }
+
+    this.sprite.play('walk_down', true)
   }
 
   private die () {
@@ -148,8 +211,9 @@ export default abstract class Unit {
   }
 
   setMoveDir (x: number, y: number) {
-    if(this.sliding) return
+    if (this.sliding) return
     this.moveDir.set(x, y).normalize()
+    this.playAnimation()
   }
 
   lookAt (x: number, y: number) {
@@ -170,12 +234,12 @@ export default abstract class Unit {
   beginAttack () {
     if (this.stunned) return
 
-     this.weapon.beginAttack()
+    this.weapon.beginAttack()
   }
 
   beginCast () {
     if (this.stunned || this.silenced) return
-    
+
     this.skill.beginCast()
   }
 
@@ -187,7 +251,7 @@ export default abstract class Unit {
     return this.lookDir.clone()
   }
 
-  getMoveDir() {
+  getMoveDir () {
     return this.moveDir.clone()
   }
 
@@ -270,12 +334,12 @@ export default abstract class Unit {
     if (intensity > this.fast) this.fast = intensity
   }
 
-  applyPhasing(duration: number) {
+  applyPhasing (duration: number) {
     if (duration <= 0) return
 
     this.phasing = true
     this.phasingDuration = Math.max(duration, this.phasingDuration)
-    this.scene.events.emit(GameEvents.START_PHASING, this)    
+    this.scene.events.emit(GameEvents.START_PHASING, this)
   }
 
   teleport (x: number, y: number) {

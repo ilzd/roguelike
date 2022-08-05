@@ -6,12 +6,17 @@ import Unit from './unit'
 
 export default class Spider extends Unit {
   static readonly CONFIG: UnitConfig = {
-    maxLife: 20,
-    moveSpeed: 100
+    key: 'character',
+    origX: 0.5,
+    origY: 0.65,
+    maxLife: 30,
+    moveSpeed: 200,
+    radius: 13,
+    scale: 1.5
   }
 
   constructor(scene: PlayScene, x: number, y: number){
-    super(scene, x, y, 'spider', Spider.CONFIG)
+    super(scene, x, y, Spider.CONFIG)
     this.weapon = new Bow(scene, this)
     this.skill = new Teleport(scene, this)
   }

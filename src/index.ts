@@ -21,5 +21,6 @@ new Phaser.Game({
         fps: 120
     }
   },
+  pixelArt: true,
   scene: [LoadScene, MenuScene, PlayScene]  
 });

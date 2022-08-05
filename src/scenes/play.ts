@@ -42,7 +42,7 @@ export default class PlayScene extends Phaser.Scene {
     this.enemyProjectiles = this.physics.add.group()
     this.registry.set(PlayScene.ENEMIES_DATA_KEY, this.playerProjectiles)
 
-    this.creatTilemap()
+    this.createTilemap()
     this.createPlayer()
     this.createEnemies()
     this.createController()
@@ -94,18 +94,10 @@ export default class PlayScene extends Phaser.Scene {
     if (this.controller.checkCast()) this.player.beginCast()
   }
 
-  private creatTilemap () {
-    this.tilemap = this.make.tilemap({
-      tileWidth: 64,
-      tileHeight: 64,
-      width: 20,
-      height: 20
-    })
-
-    const tileset = this.tilemap.addTilesetImage('grass', 'grass', 64, 64)
-
-    const layer1 = this.tilemap.createBlankLayer('layer1', tileset)
-    layer1.fill(0).setDepth(-Infinity)
+  private createTilemap () {
+    this.tilemap = this.add.tilemap('map1')
+    this.tilemap.addTilesetImage('tileset', 'tileset')
+    this.tilemap.createLayer('layer1', 'tileset').setDepth(-Infinity)
   }
 
   private createPlayer () {
@@ -115,8 +107,8 @@ export default class PlayScene extends Phaser.Scene {
   }
 
   private createEnemies () {
-    for (let i = 0; i < 20; i++) {
-      const newEnemy = new Spider(this, Phaser.Math.Between(0, 1366), Phaser.Math.Between(0, 768))
+    for (let i = 0; i < 50; i++) {
+      const newEnemy = new Spider(this, Phaser.Math.Between(0, this.tilemap.widthInPixels), Phaser.Math.Between(0, this.tilemap.heightInPixels))
       const newEnemySprite = newEnemy.getSprite()
       this.unitsGroup.add(newEnemySprite)
       this.enemies.add(newEnemySprite)
@@ -125,7 +117,7 @@ export default class PlayScene extends Phaser.Scene {
   }
 
   private setupCamera () {
-    this.cameras.main.startFollow(this.playerAimProjection, false, 0.06, 0.06)
+    this.cameras.main.startFollow(this.playerAimProjection, true, 0.06, 0.06)
   }
 
   private createController () {

@@ -9,10 +9,13 @@ export default class LoadScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('player', 'assets/images/avatar.png')
     this.load.image('spider', 'assets/images/aranha.png')
-    this.load.image('grass', 'assets/images/grass.png')
     this.load.image('arrow', 'assets/images/arrow.png')
+    this.load.image('tileset', 'assets/tilesets/tileset.png')
+
+    this.load.spritesheet('character', 'assets/spritesheets/character.png', {frameWidth: 64, frameHeight: 64})
+
+    this.load.tilemapTiledJSON('map1', 'assets/maps/map1.json')
   }
 
   create() {
