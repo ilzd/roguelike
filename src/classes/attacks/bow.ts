@@ -7,8 +7,8 @@ import { WeaponConfig } from '../../models/attack.model'
 
 export default class Bow extends Weapon {
   static readonly CONFIG: WeaponConfig = {
-    activationTime: 1,
-    recoveryTime: 0
+    activationTime: 0.5,
+    recoveryTime: 0.5
   }
 
   constructor (scene: PlayScene, owner: Unit) {
