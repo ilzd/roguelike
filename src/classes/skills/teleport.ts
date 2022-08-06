@@ -5,7 +5,7 @@ import Skill from './skill'
 
 export default class Teleport extends Skill {
   static readonly CONFIG: SkillConfig = {
-    coldown: 1,
+    coldown: 4,
     activationTime: 0
   }
   private readonly DISTANCE = 200
