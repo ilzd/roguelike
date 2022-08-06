@@ -5,6 +5,7 @@ import Unit from '../units/unit'
 export default abstract class Weapon {
   protected readonly scene: PlayScene
   protected readonly owner: Unit
+  private range: number
   private activationTime = 0.5
   private recoveryTime = 0.5
   private activationCurr = 0
@@ -23,6 +24,7 @@ export default abstract class Weapon {
   private initialize(config: WeaponConfig) {
     this.activationTime = config.activationTime
     this.recoveryTime = config.recoveryTime
+    this.range = config.range
   }
 
   update (delta: number) {
@@ -79,6 +81,10 @@ export default abstract class Weapon {
   private finishAttack () {
     this.attacking = false
     this.recovering = false
+  }
+
+  getRange() {
+    return this.range
   }
 
   protected abstract attack (): void

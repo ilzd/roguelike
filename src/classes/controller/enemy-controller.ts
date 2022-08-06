@@ -16,7 +16,17 @@ export default class EnemyController extends Controller {
     const unitPos = this.unit.getPos()
     const targetPos = this.target.getPos()
     this.unit.lookAt(targetPos.x, targetPos.y)
-    const moveDir = targetPos.subtract(unitPos)
-    this.unit.setMoveDir(moveDir.x, moveDir.y)
+
+    const deltaPos = targetPos.subtract(unitPos)
+    const distSq = deltaPos.lengthSq()
+
+    const weaponRangeSq = Math.pow(this.unit.weapon?.getRange(), 2)
+    if(distSq > weaponRangeSq) {
+      this.unit.setMoveDir(deltaPos.x, deltaPos.y)
+    } else {
+      this.unit.setMoveDir(0, 0)
+      this.unit.stopMovement()
+      this.unit.beginAttack()
+    }
   }
 }

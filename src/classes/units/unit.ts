@@ -17,7 +17,7 @@ export default abstract class Unit {
   protected sprite: Phaser.Physics.Arcade.Sprite
   private moveDir = new Phaser.Math.Vector2(0, 0)
   private lookDir = new Phaser.Math.Vector2(0, 0)
-  protected weapon: Weapon
+  public weapon: Weapon
   protected skill: Skill
 
   // stats
@@ -343,5 +343,9 @@ export default abstract class Unit {
 
   teleport (x: number, y: number) {
     this.sprite.setPosition(x, y)
+  }
+
+  getWeapon() {
+    return this.weapon
   }
 }

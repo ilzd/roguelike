@@ -101,7 +101,7 @@ export default class PlayScene extends Phaser.Scene {
   }
 
   private createEnemies () {
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 20; i++) {
       const newEnemy = new Spider(this, Phaser.Math.Between(0, this.tilemap.widthInPixels), Phaser.Math.Between(0, this.tilemap.heightInPixels))
       newEnemy.setController(new EnemyController(this, newEnemy))
       const newEnemySprite = newEnemy.getSprite()

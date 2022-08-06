@@ -8,7 +8,8 @@ import { WeaponConfig } from '../../models/attack.model'
 export default class Bow extends Weapon {
   static readonly CONFIG: WeaponConfig = {
     activationTime: 0.5,
-    recoveryTime: 0.5
+    recoveryTime: 0.5,
+    range: 400
   }
 
   constructor (scene: PlayScene, owner: Unit) {
@@ -33,7 +34,8 @@ export default class Bow extends Weapon {
       dirY: dir.y,
       damage: 40,
       pierce: 1,
-      moveSpeed: 900
+      moveSpeed: 350,
+      range: 600
     }
     return new Projectile(this.scene, this.owner, config)
   }
