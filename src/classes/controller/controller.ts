@@ -3,11 +3,11 @@ import Unit from '../units/unit'
 
 export default abstract class Controller {
   protected readonly scene: PlayScene
-  protected readonly target: Unit
+  protected readonly unit: Unit
 
-  constructor(scene: PlayScene, target: Unit) {
+  constructor(scene: PlayScene, unit: Unit) {
     this.scene = scene
-    this.target = target
+    this.unit = unit
   }
 
   public abstract update(): void

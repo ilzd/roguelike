@@ -24,7 +24,7 @@ export default class PlayScene extends Phaser.Scene {
   private playerProjectiles: Phaser.Physics.Arcade.Group;
   private enemyProjectiles: Phaser.Physics.Arcade.Group;
   private playerAimProjection = new Phaser.Math.Vector2()
-  private player: Unit
+  public player: Unit
   private nextId = 0
 
   constructor () {

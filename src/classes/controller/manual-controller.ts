@@ -10,8 +10,8 @@ export default class ManualController extends Controller {
   private right: Phaser.Input.Keyboard.Key
   private cast: Phaser.Input.Keyboard.Key
 
-  constructor (scene: PlayScene, target: Unit) {
-    super(scene, target)
+  constructor (scene: PlayScene, unit: Unit) {
+    super(scene, unit)
     this.initializeKeys()
   }
 
@@ -44,9 +44,9 @@ export default class ManualController extends Controller {
   update() {
     const inputDir = this.checkDirections()
     const pointerPos = this.scene.getPointerWorldPosition()
-    this.target.setMoveDir(inputDir.x, inputDir.y)
-    this.target.lookAt(pointerPos.x, pointerPos.y)
-    if (this.checkAttack()) this.target.beginAttack()
-    if (this.checkCast()) this.target.beginCast()
+    this.unit.setMoveDir(inputDir.x, inputDir.y)
+    this.unit.lookAt(pointerPos.x, pointerPos.y)
+    if (this.checkAttack()) this.unit.beginAttack()
+    if (this.checkCast()) this.unit.beginCast()
   }
 }

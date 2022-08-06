@@ -55,6 +55,8 @@ export default class Projectile {
       return
     }
     this.move()
+
+    this.sprite.setDepth(this.sprite.y)
   }
 
   private move () {
@@ -74,7 +76,7 @@ export default class Projectile {
   }
 
   hit(unit: Unit) {
-    if(this.unitsHit.includes(unit)) return
+    if(this.unitsHit.includes(unit) || !unit) return
     this.unitsHit.push(unit)
     unit.takeDamage(this.damage, this.owner)
 

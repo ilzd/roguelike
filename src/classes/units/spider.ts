@@ -11,7 +11,7 @@ export default class Spider extends Unit {
     origX: 0.5,
     origY: 0.65,
     maxLife: 30,
-    moveSpeed: 200,
+    moveSpeed: 85,
     radius: 13,
     scale: 1.5
   }
